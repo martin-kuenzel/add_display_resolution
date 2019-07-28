@@ -33,10 +33,10 @@ while getopts 'hpx:y:d:' OPT; do
 done;
 
 # the script requires root permissions to be run
-[ "$(whoami)" != "root" ] && ( echo "you need to be root to run this script"; exit 1; )
+[ "$(whoami)" != "root" ] && { echo "you need to be root to run this script"; exit 1; }
 
 # check for existance of all required options
-( [ -z $RES_X ] || [ -z $RES_Y ] || [ -z $RES_OUTPUT ]; ) && ( _help; exit 1; )
+( [ -z $RES_X ] || [ -z $RES_Y ] || [ -z $RES_OUTPUT ]; ) && { _help; exit 1; }
 
 # create the modeline to be used
 echo -n "Creating modeline ... "
@@ -53,7 +53,7 @@ $XRANDR_COMMAND
 T
 
 # if option -r was given, we will try to add the mode for the output
-[ $RES_DRY -eq 0 ] && (
+[ $RES_DRY -eq 0 ] && {
     echo -en "\nTrying to add $MODE to the given output $RES_OUTPUT ... "
 
     # try to delete the mode, so we don't run in any errors if it allready exists
@@ -65,10 +65,11 @@ T
     # try to run the add command for the mode and the given output
     OUTPUT=""
     OUTPUT=$(sh -c "$XRANDR_COMMAND" 2>&1)
-    ( [ $? -eq 0 ] && echo "Success"; ) || (
+    ( [ $? -eq 0 ] && echo "Success"; ) || {
         echo -e "Error\n\n$OUTPUT\n";
         echo -e "There was an error while trying to add the mode $MODE for $RES_OUTPUT, maybe output $RES_OUTPUT doesn't exist ?";
-    )
-)
+        exit 1;
+    }
+}
 
 exit 0;
