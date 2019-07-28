@@ -19,16 +19,22 @@ Warning ... using bad resolution settings might damage your hardware!
 HLP
 }
 
+_list_outputs(){
+    echo -e "\nPossible outputs are:"
+    xrandr 2>&1|sed -re '/^[[:space:]]/d'|tail +2|awk '{print $1}'
+}
+
 # run the xrandr command at the end ?
 RES_DRY=0
 
-while getopts 'hpx:y:d:' OPT; do 
+while getopts 'hpox:y:d:' OPT; do 
     case $OPT in 
         x) RES_X=$OPTARG;;
         y) RES_Y=$OPTARG;;
         d) RES_OUTPUT=$OPTARG;;
         p) RES_DRY=1;;
         h) _help && exit 0;;
+        o) _list_outputs && exit 0;;
     esac; 
 done;
 
@@ -54,7 +60,7 @@ T
 
 # if option -r was given, we will try to add the mode for the output
 [ $RES_DRY -eq 0 ] && {
-    echo -en "\nTrying to add $MODE to the given output $RES_OUTPUT ... "
+    echo -en "Trying to add $MODE to the given output $RES_OUTPUT ... "
 
     # try to delete the mode, so we don't run in any errors if it allready exists
     xrandr --delmode $RES_OUTPUT "$MODE" 2>/dev/null;
@@ -68,6 +74,7 @@ T
     ( [ $? -eq 0 ] && echo "Success"; ) || {
         echo -e "Error\n\n$OUTPUT\n";
         echo -e "There was an error while trying to add the mode $MODE for $RES_OUTPUT, maybe output $RES_OUTPUT doesn't exist ?";
+        _list_outputs
         exit 1;
     }
 }
